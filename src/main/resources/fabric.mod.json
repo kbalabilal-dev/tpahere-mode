@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "tpahere",
+  "version": "${version}",
+  "name": "TPAHere Picker",
+  "description": "Client-side player picker that sends a teleport command (default /tpahere) to many players with one tap or a rebindable key. Queue can be paused, settings are in Mod Menu.",
+  "icon": "assets/tpahere/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["com.tpaheremod.TpaHereClient"],
+    "modmenu": ["com.tpaheremod.TpaModMenu"]
+  },
+  "mixins": ["tpahere.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.18.0",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "modmenu": "*"
+  }
+}
