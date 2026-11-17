@@ -2,6 +2,7 @@
   "key.tpahere.open": "Open TPAHere picker (press again to stop a queue)",
   "key.tpahere.cancel": "Cancel TPAHere queue",
   "key.tpahere.pause": "Pause / resume TPAHere queue",
+  "key.tpahere.autohit": "Toggle TPAHere auto hit",
   "key.tpahere.settings": "Open TPAHere settings",
   "key.category.tpahere.main": "TPAHere"
 }

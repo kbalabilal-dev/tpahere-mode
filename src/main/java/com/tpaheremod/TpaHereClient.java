@@ -17,10 +17,12 @@ public class TpaHereClient implements ClientModInitializer {
     private static KeyBinding cancelKey;
     private static KeyBinding settingsKey;
     private static KeyBinding pauseKey;
+    private static KeyBinding autoHitKey;
 
     @Override
     public void onInitializeClient() {
         TpaConfig.load();
+        TpaCombat.init();
 
         openKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.tpahere.open", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_H, CATEGORY));
@@ -30,6 +32,9 @@ public class TpaHereClient implements ClientModInitializer {
                 "key.tpahere.settings", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, CATEGORY));
         pauseKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.tpahere.pause", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_K, CATEGORY));
+
+        autoHitKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.tpahere.autohit", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_L, CATEGORY));
 
         HudElementRegistry.attachElementBefore(VanillaHudElements.CHAT,
                 Identifier.of("tpahere", "queue_hud"), TpaHud::render);
@@ -54,6 +59,11 @@ public class TpaHereClient implements ClientModInitializer {
                     client.setScreen(new TpaConfigScreen(null));
                 }
             }
+            while (autoHitKey.wasPressed()) {
+                if (client.world != null && client.currentScreen == null) TpaAutoHit.toggle(client);
+            }
+            TpaCombat.tick(client);
+            TpaAutoHit.tick(client);
             TpaQueue.tick(client);
         });
     }

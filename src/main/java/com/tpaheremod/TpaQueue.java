@@ -42,6 +42,8 @@ public final class TpaQueue {
     private static boolean paused;
     private static int lastClickedSyncId = -1;
     private static String current = "";
+    private static List<String> lastNames = List.of();
+    private static boolean lastRepeat, lastRefresh;
 
     private TpaQueue() {}
 
@@ -107,6 +109,9 @@ public final class TpaQueue {
      */
     public static void start(MinecraftClient client, List<String> names, boolean repeatMode, boolean refreshMode) {
         if (names.isEmpty()) return;
+        lastNames = List.copyOf(names);
+        lastRepeat = repeatMode;
+        lastRefresh = refreshMode;
         baseNames = List.copyOf(names);
         repeat = repeatMode;
         refreshAll = refreshMode;
@@ -114,6 +119,17 @@ public final class TpaQueue {
         paused = false;
         lastClickedSyncId = -1;
         beginRound(client);
+    }
+
+    /** Starts the last used queue again (used when auto hit is switched on). */
+    public static void restartLast(MinecraftClient client) {
+        if (lastNames.isEmpty()) return;
+        start(client, lastNames, lastRepeat, lastRefresh);
+    }
+
+    /** True while the queue is held because "Combat: Xs" is showing. */
+    public static boolean combatHold() {
+        return TpaConfig.combatPause && TpaCombat.inCombat();
     }
 
     public static void cancel(MinecraftClient client) {
@@ -186,12 +202,14 @@ public final class TpaQueue {
     public static List<String> hudLines() {
         List<String> l = new ArrayList<>();
         if (state == State.IDLE) return l;
-        l.add("TPAHere" + (repeat ? "  (round " + round + ")" : "") + (paused ? "  [PAUSED]" : ""));
+        boolean hold = combatHold();
+        l.add("TPAHere" + (repeat ? "  (round " + round + ")" : "") + (paused ? "  [PAUSED]" : "")
+                + (hold ? "  [COMBAT " + TpaCombat.secondsLeft() + "s]" : ""));
         switch (state) {
             case WAITING -> l.add("Sending: " + current);
-            case DELAY -> l.add(paused ? "Pausing..." : "Next player in " + secs(TpaConfig.delayTicks - timer));
-            case LOOP_PAUSE -> l.add(paused ? "Paused" : "Next round in " + secs(pauseTicks - timer));
-            default -> l.add(paused ? "Paused (press the key to resume)" : "Next player...");
+            case DELAY -> l.add(paused || hold ? "Pausing..." : "Next player in " + secs(TpaConfig.delayTicks - timer));
+            case LOOP_PAUSE -> l.add(paused || hold ? "Paused" : "Next round in " + secs(pauseTicks - timer));
+            default -> l.add(hold ? "In combat - waiting..." : paused ? "Paused (press the key to resume)" : "Next player...");
         }
         l.add("Sent " + sent + "/" + total + "   Left: " + queue.size());
         return l;
@@ -210,7 +228,7 @@ public final class TpaQueue {
         switch (state) {
             case IDLE -> { }
             case NEXT -> {
-                if (paused) return; // hold here until resumed
+                if (paused || combatHold()) return; // hold here until resumed / combat is over
                 // Skip-list players and players who already left are skipped instantly, not counted.
                 String name = queue.poll();
                 while (name != null && (TpaConfig.isSkipped(name) || !isOnline(client, name))) {
@@ -269,7 +287,7 @@ public final class TpaQueue {
                 if (timer >= TpaConfig.delayTicks) state = State.NEXT;
             }
             case LOOP_PAUSE -> {
-                if (paused) return;
+                if (paused || combatHold()) return;
                 timer++;
                 if (timer >= pauseTicks) beginRound(client);
             }

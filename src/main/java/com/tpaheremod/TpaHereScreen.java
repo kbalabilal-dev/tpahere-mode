@@ -44,6 +44,11 @@ public class TpaHereScreen extends Screen {
                         b -> client.setScreen(new TpaConfigScreen(this)))
                 .dimensions(4, 4, 56, 20).build());
 
+        addDrawableChild(ButtonWidget.builder(autoHitLabel(), b -> {
+                    TpaAutoHit.toggle(client);
+                    b.setMessage(autoHitLabel());
+                }).dimensions(width - 94, 4, 90, 20).build());
+
         String oldSearch = search != null ? search.getText() : "";
         search = new TextFieldWidget(textRenderer, width / 2 - 102, 28, 118, 20, Text.literal("Search"));
         search.setText(oldSearch);
@@ -92,6 +97,10 @@ public class TpaHereScreen extends Screen {
 
     private Text multiLabel() {
         return Text.literal(multi ? "Multi: ON" : "Multi: OFF");
+    }
+
+    private Text autoHitLabel() {
+        return Text.literal(TpaAutoHit.isEnabled() ? "Auto hit: ON" : "Auto hit: OFF");
     }
 
     private Text autoLabel() {

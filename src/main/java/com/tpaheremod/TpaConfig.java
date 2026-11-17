@@ -21,6 +21,8 @@ public final class TpaConfig {
     public static int windowTimeoutTicks = 25;  // wait for the confirm window before skipping a player
     public static int roundPauseTicks = 40;     // pause before a new round (auto mode)
     public static int hudPos = 1;               // 0 = off, 1 = top center, 2 = top left, 3 = top right
+    public static int autoHitDelayMs = 300;     // auto hit: right click once every X ms
+    public static boolean combatPause = true;   // pause the queue while "Combat: Xs" is on the hotbar
 
     public static final String DEFAULT_COMMAND = "tpahere";
     public static String command = DEFAULT_COMMAND; // command sent for every player (no leading slash)
@@ -34,6 +36,8 @@ public final class TpaConfig {
         int windowTimeoutTicks = 25;
         int roundPauseTicks = 40;
         int hudPos = 1;
+        int autoHitDelayMs = 300;
+        boolean combatPause = true;
         String command = DEFAULT_COMMAND;
         boolean hideWindow = true;
         List<String> skipList = new ArrayList<>();
@@ -59,6 +63,8 @@ public final class TpaConfig {
             windowTimeoutTicks = clamp(d.windowTimeoutTicks, 10, 100);
             roundPauseTicks = clamp(d.roundPauseTicks, 10, 600);
             hudPos = clamp(d.hudPos, 0, 3);
+            autoHitDelayMs = d.autoHitDelayMs <= 0 ? 300 : clamp(d.autoHitDelayMs, 50, 5000);
+            combatPause = d.combatPause;
             command = cleanCommand(d.command);
             hideWindow = d.hideWindow;
             SKIP.clear();
@@ -74,6 +80,8 @@ public final class TpaConfig {
         d.windowTimeoutTicks = windowTimeoutTicks;
         d.roundPauseTicks = roundPauseTicks;
         d.hudPos = hudPos;
+        d.autoHitDelayMs = autoHitDelayMs;
+        d.combatPause = combatPause;
         d.command = command;
         d.hideWindow = hideWindow;
         d.skipList = new ArrayList<>(SKIP);
